@@ -1,53 +1,92 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+// Filename: index.js
+// Combined code from all files
+import React, { useState } from 'react';
+import { SafeAreaView, View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 
-const App = () => {
-  const fullText = 'Hi, this is Apply.\nCreating mobile apps is now as simple as typing text.\nJust input your idea and press APPLY, and our platform does the rest...';
-  const [displayedText, setDisplayedText] = useState('');
-  const [index, setIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+export default function App() {
+    const [items, setItems] = useState([]);
+    const [text, setText] = useState('');
 
-  useEffect(() => {
-    if (isPaused) return;
-
-    const interval = setInterval(() => {
-      setDisplayedText((prev) => prev + fullText[index]);
-      setIndex((prev) => {
-        if (prev === fullText.length - 1) {
-          setIsPaused(true);
-          setTimeout(() => {
-            setDisplayedText('');
-            setIndex(0);
-            setIsPaused(false);
-          }, 2000);
-          return 0;
+    const addItem = () => {
+        if (text.trim()) {
+            setItems([...items, { id: Date.now().toString(), name: text.trim() }]);
+            setText('');
         }
-        return prev + 1;
-      });
-    }, 100);
+    };
 
-    return () => clearInterval(interval);
-  }, [index, isPaused]);
+    const deleteItem = (id) => {
+        setItems(items.filter(item => item.id !== id));
+    };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>{displayedText}</Text>
-    </View>
-  );
-};
+    return (
+        <SafeAreaView style={styles.container}>
+            <Text style={styles.title}>Shopping List</Text>
+            <View style={styles.inputContainer}>
+                <TextInput
+                    value={text}
+                    style={styles.input}
+                    placeholder="Add a new item"
+                    onChangeText={setText}
+                />
+                <Button title="Add" onPress={addItem} />
+            </View>
+            <FlatList
+                data={items}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                    <View style={styles.itemContainer}>
+                        <Text style={styles.itemText}>{item.name}</Text>
+                        <TouchableOpacity onPress={() => deleteItem(item.id)}>
+                            <Text style={styles.deleteButton}>Delete</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+                contentContainerStyle={styles.list}
+            />
+        </SafeAreaView>
+    );
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'black',
-    padding: 20,
-  },
-  text: {
-    color: 'white',
-    fontSize: 24,
-    fontFamily: 'monospace',
-  },
+    container: {
+        flex: 1,
+        padding: 20,
+        backgroundColor: '#FFFFFF',
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        marginBottom: 20,
+    },
+    input: {
+        flex: 1,
+        borderColor: '#CCCCCC',
+        borderWidth: 1,
+        borderRadius: 10,
+        padding: 10,
+        marginRight: 10,
+    },
+    list: {
+        flexGrow: 1,
+    },
+    itemContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 15,
+        borderBottomWidth: 1,
+        borderColor: '#EEEEEE',
+    },
+    itemText: {
+        fontSize: 18,
+    },
+    deleteButton: {
+        color: 'red',
+        fontSize: 16,
+    },
 });
-
-export default App;
